@@ -25,6 +25,7 @@ public:
       }
       return make_pair(c, v);
    }
+   int num_activos() const { return valores().first; }
 };
 
 class Sudoku {
@@ -32,14 +33,26 @@ class Sudoku {
 
    static vector< vector<int> > _grupo, _vecinos, _grupos_de;
 
-   bool asigna(int k, int valor);
    bool elimina(int k, int valor);
 public:
    Sudoku(string s);
+   bool asigna(int k, int valor);
+   Posibles posibles(int k) const { return _casillas[k]; }
+   int menos_posibilidades() const;
    void escribe(ostream& o) const;
+   bool resuelto() const;
 
    static void inicializa();
 };
+
+bool Sudoku::resuelto() const {
+   for (int i = 0; i < _casillas.size(); i++) {
+      if (_casillas[i].num_activos() != 1) {
+         return false;
+      }
+   }
+   return true;
+}
 
 void Sudoku::escribe(ostream& o) const {
    int ancho = 1;
@@ -128,6 +141,20 @@ bool Sudoku::elimina(int k, int valor) {
    return true;
 }
 
+int Sudoku::menos_posibilidades() const {
+   int k = -1, min;
+   for (int i = 0; i < _casillas.size(); i++) {
+      int m = _casillas[i].num_activos();
+      if (m > 1) {
+         if (k == -1 || m < min) {
+            min = m;
+            k = i;
+         }
+      }
+   }
+   return k;
+}
+
 Sudoku::Sudoku(string s) 
   : _casillas(81) 
 {
@@ -145,26 +172,43 @@ Sudoku::Sudoku(string s)
    }
 }
 
-int main() {
-   Sudoku::inicializa();
-   string s;
-   char c;
-   while (cin >> c) s += c;
-   Sudoku S(s);
-   S.escribe(cout);
-   cout << endl;
+Sudoku* soluciona(Sudoku *S) {
+   if (S == NULL || S->resuelto()) {
+      return S;
+   }
+   int k = S->menos_posibilidades();
+   Posibles p = S->posibles(k);
+   for (int i = 1; i <= 9; i++) {
+      if (!p.activo(i)) {
+         continue;
+      }
+      Sudoku *S1 = new Sudoku(*S);
+      if (!S1->asigna(k, i)) {
+         delete S1;
+         continue;
+      }
+      Sudoku *S2 = soluciona(S1);
+      if (S2 != S1) {
+         delete S1;
+      } 
+      if (S2 != NULL) {
+         return S2;
+      }
+   }
+   return NULL;
 }
 
-   /*
-   string s2 = "4 8 3 |9 2 1 |6 5 7"
-      "9 6 7 |3 4 5 |8 2 1"
-      "2 5 1 |8 7 6 |4 9 3"
-      "------+------+-----"
-      "5 4 8 |1 3 2 |9 7 6"
-      "7 2 9 |5 6 4 |1 3 8"
-      "1 3 6 |7 9 8 |2 4 5"
-      "------+------+-----"
-      "3 7 2 |6 8 9 |5 1 4"
-      "8 1 4 |2 5 3 |7 6 9"
-      "6 9 5 |4 1 7 |3 8 2";
-   */
+int main() {
+   Sudoku::inicializa();
+   string line;
+   while (getline(cin, line)) {
+      Sudoku* S = new Sudoku(line);
+      S = soluciona(S);
+      if (S != NULL) {
+         S->escribe(cout);
+      } else {
+         cout << "No hay solución";
+      }
+      cout << endl;
+   }
+}

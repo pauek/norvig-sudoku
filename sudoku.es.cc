@@ -179,20 +179,16 @@ Sudoku* soluciona(Sudoku *S) {
    int k = S->menos_posibilidades();
    Posibles p = S->posibles(k);
    for (int i = 1; i <= 9; i++) {
-      if (!p.activo(i)) {
-         continue;
-      }
-      Sudoku *S1 = new Sudoku(*S);
-      if (!S1->asigna(k, i)) {
+      if (p.activo(i)) {
+         Sudoku *S1 = new Sudoku(*S);
+         if (S1->asigna(k, i)) {
+            Sudoku *S2 = soluciona(S1);
+            if (S2 != NULL) {
+               if (S2 != S1) delete S1;
+               return S2;
+            }
+         }
          delete S1;
-         continue;
-      }
-      Sudoku *S2 = soluciona(S1);
-      if (S2 != S1) {
-         delete S1;
-      } 
-      if (S2 != NULL) {
-         return S2;
       }
    }
    return NULL;
@@ -209,6 +205,7 @@ int main() {
       } else {
          cout << "No hay solución";
       }
+      delete S;
       cout << endl;
    }
 }

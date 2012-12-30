@@ -139,12 +139,9 @@ bool Sudoku::eliminate(int k, int val) {
 int Sudoku::least_count() const {
    int k = -1, min;
    for (int i = 0; i < _cells.size(); i++) {
-      int m = _cells[i].count();
-      if (m > 1) {
-         if (k == -1 || m < min) {
-            min = m;
-            k = i;
-         }
+      const int m = _cells[i].count();
+      if (m > 1 && (k == -1 || m < min)) {
+         min = m, k = i;
       }
    }
    return k;

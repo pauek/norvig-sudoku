@@ -138,12 +138,9 @@ bool Sudoku::elimina(int k, int val) {
 int Sudoku::menos_posibilidades() const {
    int k = -1, min;
    for (int i = 0; i < _celdas.size(); i++) {
-      int m = _celdas[i].num_activos();
-      if (m > 1) {
-         if (k == -1 || m < min) {
-            min = m;
-            k = i;
-         }
+      const int m = _celdas[i].num_activos();
+      if (m > 1 && (k == -1 || m < min)) {
+         min = m, k = i;
       }
    }
    return k;

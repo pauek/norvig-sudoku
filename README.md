@@ -1,4 +1,5 @@
 norvig-sudoku
 =============
 
-Implementatión of Norvig's Sudoku solver in C++
+Implementation of Norvig's Sudoku solver in C++ 
+(English & Spanish versions).

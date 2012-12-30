@@ -11,7 +11,7 @@ public:
    bool   activo(int i)  const { return _b[i-1]; }
    int    num_activos()  const { return count(_b.begin(), _b.end(), true); }
    void   elimina(int i)       { _b[i-1] = false; }
-   int    valor()        const {
+   int    val()          const {
       auto it = find(_b.begin(), _b.end(), true);
       return (it != _b.end() ? 1 + (it - _b.begin()) : -1);
    }
@@ -29,24 +29,23 @@ string Posibles::str(int ancho) const {
 
 class Sudoku {
    vector<Posibles> _celdas;
-
    static vector< vector<int> > _grupo, _vecinos, _grupos_de;
 
-   bool elimina(int k, int valor);
+   bool     elimina(int k, int val);
 public:
    Sudoku(string s);
+   static void inicializa();
+
    Posibles posibles(int k) const { return _celdas[k]; }
    bool     resuelto() const;
-   bool     asigna(int k, int valor);
+   bool     asigna(int k, int val);
    int      menos_posibilidades() const;
    void     escribe(ostream& o) const;
-
-   static void inicializa();
 };
 
 bool Sudoku::resuelto() const {
-   for (int i = 0; i < _celdas.size(); i++) {
-      if (_celdas[i].num_activos() != 1) {
+   for (int k = 0; k < _celdas.size(); k++) {
+      if (_celdas[k].num_activos() != 1) {
          return false;
       }
    }
@@ -58,7 +57,7 @@ void Sudoku::escribe(ostream& o) const {
    for (int k = 0; k < _celdas.size(); k++) {
       ancho = max(ancho, 1 + _celdas[k].num_activos());
    }
-   const string sep(3*ancho, '-');
+   const string sep(3 * ancho, '-');
    for (int i = 0; i < 9; i++) {
       if (i == 3 || i == 6) {
          o << sep << "+-" << sep << "+" << sep << endl;
@@ -94,44 +93,42 @@ void Sudoku::inicializa() {
    }
 }
 
-bool Sudoku::asigna(int k, int valor) {
+bool Sudoku::asigna(int k, int val) {
    for (int i = 1; i <= 9; i++) {
-      if (i != valor) {
+      if (i != val) {
          if (!elimina(k, i)) return false;
       }
    }
    return true;
 }
 
-bool Sudoku::elimina(int k, int valor) {
-   if (!_celdas[k].activo(valor)) {
+bool Sudoku::elimina(int k, int val) {
+   if (!_celdas[k].activo(val)) {
       return true;
    }
-   _celdas[k].elimina(valor);
+   _celdas[k].elimina(val);
    const int N = _celdas[k].num_activos();
    if (N == 0) {
       return false;
    } else if (N == 1) {
-      const int v = _celdas[k].valor();
+      const int v = _celdas[k].val();
       for (int i = 0; i < _vecinos[k].size(); i++) {
-         if (!elimina(_vecinos[k][i], v)) {
-            return false;
-         }
+         if (!elimina(_vecinos[k][i], v)) return false;
       }
    }
    for (int i = 0; i < _grupos_de[k].size(); i++) {
       const int x = _grupos_de[k][i];
-      vector<int> Ks;
+      int n = 0, ks;
       for (int j = 0; j < 9; j++) {
          const int p = _grupo[x][j];
-         if (_celdas[p].activo(valor)) {
-            Ks.push_back(p);
+         if (_celdas[p].activo(val)) {
+            n++, ks = p;
          }
       }
-      if (Ks.size() == 0) {
+      if (n == 0) {
          return false;
-      } else if (Ks.size() == 1) {
-         if (!asigna(Ks[0], valor)) {
+      } else if (n == 1) {
+         if (!asigna(ks, val)) {
             return false;
          }
       }
@@ -194,9 +191,9 @@ Sudoku* soluciona(Sudoku *S) {
 
 int main() {
    Sudoku::inicializa();
-   string line;
-   while (getline(cin, line)) {
-      Sudoku* S = soluciona(new Sudoku(line));
+   string linea;
+   while (getline(cin, linea)) {
+      Sudoku* S = soluciona(new Sudoku(linea));
       if (S != NULL) {
          S->escribe(cout);
       } else {

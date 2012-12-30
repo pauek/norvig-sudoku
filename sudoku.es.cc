@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <assert.h>
 using namespace std;
 
@@ -7,24 +8,27 @@ class Posibles {
    vector<bool> _bits;
 public:
    Posibles() : _bits(10, true) {}
-   bool activo(int i) const { return _bits[i]; }
-   void elimina(int i) { _bits[i] = false; }
-   string str() const {
-      string s;
-      for (int i = 1; i < 10; i++) {
-         if (_bits[i]) s += '0' + i;
-      }
-      return s;
-   }
-   pair<int, int> valores() const {
-      int c = 0, v;
-      for (int i = 1; i <= 9; i++) {
-         if (_bits[i]) v = i, c++;
-      }
-      return make_pair(c, v);
-   }
-   int num_activos() const { return valores().first; }
+   bool   activo(int i) const { return _bits[i]; }
+   int    num_activos() const { return count(_bits.begin() + 1, _bits.end(), true); }
+   void   elimina(int i)      { _bits[i] = false; }
+   string str() const;
+   int    primero() const;
 };
+
+string Posibles::str() const {
+   string s;
+   for (int i = 1; i <= 9; i++) {
+      if (activo(i)) s += '0' + i;
+   }
+   return s;
+} 
+
+int Posibles::primero() const {
+   for (int i = 1; i <= 9; i++) {
+      if (activo(i)) return i;
+   }
+   return -1;
+}
 
 class Sudoku {
    vector<Posibles> _casillas;
@@ -55,8 +59,7 @@ bool Sudoku::resuelto() const {
 void Sudoku::escribe(ostream& o) const {
    int ancho = 1;
    for (int k = 0; k < _casillas.size(); k++) {
-      pair<int, int> cv = _casillas[k].valores();
-      ancho = max(ancho, 1 + cv.first);
+      ancho = max(ancho, 1 + _casillas[k].num_activos());
    }
    string sep(ancho, '-');
    for (int i = 0; i < 9; i++) {
@@ -112,11 +115,11 @@ bool Sudoku::elimina(int k, int valor) {
       return true;
    }
    _casillas[k].elimina(valor);
-   pair<int, int> cv = _casillas[k].valores();
-   if (cv.first == 0) {
+   int num_activos = _casillas[k].num_activos();
+   if (num_activos == 0) {
       return false;
-   } else if (cv.first == 1) {
-      int v = cv.second;
+   } else if (num_activos == 1) {
+      int v = _casillas[k].primero();
       for (int i = 0; i < _vecinos[k].size(); i++) {
          if (!elimina(_vecinos[k][i], v)) return false;
       }

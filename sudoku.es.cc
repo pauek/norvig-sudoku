@@ -3,12 +3,10 @@
 #include <assert.h>
 using namespace std;
 
-const vector<bool> TODOS(10, true);
-
 class Posibles {
    vector<bool> _bits;
 public:
-   Posibles() : _bits(TODOS) {}
+   Posibles() : _bits(10, true) {}
    bool activo(int i) const { return _bits[i]; }
    void elimina(int i) { _bits[i] = false; }
    string str() const {

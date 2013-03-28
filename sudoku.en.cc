@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <memory>
 using namespace std;
 
 class Possible {
@@ -164,39 +165,34 @@ Sudoku::Sudoku(string s)
    }
 }
 
-Sudoku* solve(Sudoku *S) {
-   if (S == NULL || S->is_solved()) {
+unique_ptr<Sudoku> solve(unique_ptr<Sudoku> S) {
+   if (S == nullptr || S->is_solved()) {
       return S;
    }
    int k = S->least_count();
    Possible p = S->possible(k);
    for (int i = 1; i <= 9; i++) {
       if (p.is_on(i)) {
-         Sudoku *S1 = new Sudoku(*S);
+         unique_ptr<Sudoku> S1(new Sudoku(*S));
          if (S1->assign(k, i)) {
-            Sudoku *S2 = solve(S1);
-            if (S2 != NULL) {
-               if (S2 != S1) delete S1;
+            if (auto S2 = solve(std::move(S1))) {
                return S2;
             }
          }
-         delete S1;
       }
    }
-   return NULL;
+   return {};
 }
 
 int main() {
    Sudoku::init();
    string line;
    while (getline(cin, line)) {
-      Sudoku* S = solve(new Sudoku(line));
-      if (S != NULL) {
+      if (auto S = solve(unique_ptr<Sudoku>(new Sudoku(line)))) {
          S->write(cout);
       } else {
          cout << "No solution";
       }
-      delete S;
       cout << endl;
    }
 }

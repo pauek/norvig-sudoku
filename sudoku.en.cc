@@ -70,6 +70,17 @@ void Sudoku::write(ostream& o) const {
    }
 }
 
+/**
+ * _group[i] for i in {0 .. 8} = horizontal units (i-th row)
+ * _group[j] for j in {9 .. 17} = vertical units (j-th column)
+ * _group[k] for k in {18 .. 26} = square unit counted left to right
+ *                                 top to bottom
+ * _group_of[i] = unit indices of box i in _group.
+ * Therefore, for all i in {0 .. 80},  _group_of[i].size() = 3
+ *            i.e. each box belongs to exactly 3 units.
+ * 
+ * _neighbors[i] for i in {0 .. 80} = peers of i-th box
+ */
 vector< vector<int> > 
 Sudoku::_group(27), Sudoku::_neighbors(81), Sudoku::_groups_of(81);
 

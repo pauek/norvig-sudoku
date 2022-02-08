@@ -88,7 +88,8 @@ void Sudoku::init() {
       for (int x = 0; x < _groups_of[k].size(); x++) {
          for (int j = 0; j < 9; j++) {
             int k2 = _group[_groups_of[k][x]][j];
-            if (k2 != k) _neighbors[k].push_back(k2);
+            if (k2 != k && !(x == 2 && (abs(k2 - k) < 3 || abs(k2 - k) % 3 == 0))) 
+               _neighbors[k].push_back(k2);
          }
       }
    }

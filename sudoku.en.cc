@@ -70,6 +70,17 @@ void Sudoku::write(ostream& o) const {
    }
 }
 
+/**
+ * for i in {0 .. 8} _group[i] = horizontal units ((i)th row)
+ * for j in {9 .. 17} _group[j] = vertical units ((j - 9)th column)
+ * for k in {18 .. 26} _group[k] = square unit counted left to right
+ *                                 top to bottom ((k - 18)th box)
+ * _group_of[i] = unit indices in _group for i-th square.
+ * Therefore, for all i in {0 .. 80},  _group_of[i].size() = 3
+ *            i.e. each square belongs to exactly 3 units.
+ * 
+ * for i in {0 .. 80} _neighbors[i] = peers of i-th square
+ */
 vector< vector<int> > 
 Sudoku::_group(27), Sudoku::_neighbors(81), Sudoku::_groups_of(81);
 
@@ -88,7 +99,8 @@ void Sudoku::init() {
       for (int x = 0; x < _groups_of[k].size(); x++) {
          for (int j = 0; j < 9; j++) {
             int k2 = _group[_groups_of[k][x]][j];
-            if (k2 != k) _neighbors[k].push_back(k2);
+            if (k2 != k && !(x == 2 && (abs(k2 - k) < 3 || abs(k2 - k) % 3 == 0))) 
+               _neighbors[k].push_back(k2);
          }
       }
    }
